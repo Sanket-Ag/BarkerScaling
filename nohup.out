@@ -1,1 +1,4 @@
 /Library/Frameworks/R.framework/Resources/bin/BATCH: line 60: 12752 Killed: 9               ${R_HOME}/bin/R -f ${in} ${opts} ${R_BATCH_OPTIONS} > ${out} 2>&1
+/Library/Frameworks/R.framework/Resources/bin/BATCH: line 60: 35207 Killed: 9               ${R_HOME}/bin/R -f ${in} ${opts} ${R_BATCH_OPTIONS} > ${out} 2>&1
+/Library/Frameworks/R.framework/Resources/bin/BATCH: line 60: 36855 Killed: 9               ${R_HOME}/bin/R -f ${in} ${opts} ${R_BATCH_OPTIONS} > ${out} 2>&1
+/Library/Frameworks/R.framework/Resources/bin/BATCH: line 60: 40014 Killed: 9               ${R_HOME}/bin/R -f ${in} ${opts} ${R_BATCH_OPTIONS} > ${out} 2>&1
