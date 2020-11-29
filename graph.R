@@ -2,6 +2,7 @@
 ###  Optimal acceptance rate versus dimension
 #############################################
 library(Rfast)
+library(mcmcse)
 
 AR.step <- function(current, sigma, alpha = "mh"){         
   # Accept - reject step
@@ -38,21 +39,17 @@ AR.sample <- function(init, N, sigma, K, alpha = "mh"){
   
   d <- length(init)
   b <- numeric(d)
-  bm <- matrix(0, nrow = N/K, ncol = d)   # batch means
+  step <- matrix(0, nrow = N, ncol = d)   # batch means
   a <- 0
   
-  for(i in 1:N){
-    step = AR.step(init, sigma, alpha)
-    b = b + step[1:d]
-    a = a + step[d+1]
-    init = step[1:d]
-    
-    if(i%%K == 0){
-      bm[i/K, ] <- b/K
-      b <- numeric(d)
-    }
+  step[1, ] <- init
+  for(i in 2:N){
+     foo <-  AR.step(step[i-1, ], sigma, alpha)
+     step[i,] <- foo[1:d]
+     a <- a + foo[d+1]
+
   }
-  return(list(bm, a/N))
+  return(list(step, a/N))
 }
 
 
@@ -77,7 +74,7 @@ for(j in 1:length(d)){
   
   for(i in 1:length(sigma)){
     samp <- AR.sample(init, N, sigma[i], K)
-    e <- colVars(samp[[1]])
+    e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
     a_j[i] <- samp[[2]]
     eff_j[i] <- mean(e)
     cat("\r", i)
@@ -87,37 +84,48 @@ for(j in 1:length(d)){
   print(paste0("Done for d = ", j))
 }
 
-plot(d, a_mh, xlab = "Dimensions", ylab = "Optimal acceptance (M-H)", type = "b")
-a_mh
+pdf("acc_mh.pdf", height = 6, width = 6)
+plot(d, a_mh, xlab = "Dimensions", ylab = "Optimal acceptance (M-H)", type = "b", pch = 16)
+dev.off()
+save(a_mh,sigma_mh, eff_j , file = "opt_MH")
 
 
 ###########################################################
 #### Minimizing variance between Batch means (Barker Algorithm)
 ###########################################################
 
-sigm_b <- numeric(length = length(d))     # Optimal Sigma
+sigma_b <- numeric(length = length(d))     # Optimal Sigma
 a_b <- numeric(length = length(d))        # Optimal acceptance
 init <- numeric()
 
 for(j in 1:length(d)){
   print(paste0("Doing for d = ", d[j]))
   sigma <- seq(2/sqrt(d[j]), 3/sqrt(d[j]), length.out = 21)
-  eff_j <- numeric(length = length(sigma))
+  eff_jb <- numeric(length = length(sigma))
   a_j <- numeric(length = length(sigma))
   
   init <- c(init, rnorm(1, 0, 1))
   
   for(i in 1:length(sigma)){
     samp <- AR.sample(init, N, sigma[i], K, alpha = "barker")
-    e <- colVars(samp[[1]])
+    e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
     a_j[i] <- samp[[2]]
-    eff_j[i] <- mean(e)
+    eff_jb[i] <- mean(e)
     cat("\r", i)
   }
-  sigma_b[j] <- sigma[which.min(eff_j)]
+  sigma_b[j] <- sigma[which.min(eff_jb)]
   a_b[j] <- a_j[which.min(eff_j)]
   print(paste0("Done for d = ", j))
 }
 
-plot(d, a_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
+pdf("acc_bark.pdf", height = 6, width = 6)
+plot(d, a_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
+dev.off()
+save(a_b, sigma_b, eff_jb , file = "opt_bark")
 a_b
+
+pdf("acc_both.pdf", height = 6, width = 6)
+plot(d, a_b, ylim = c(.18,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
+lines(d, a_mh, type = "b", pch = 16, lty = 2)
+legend("topright", legend = c("Barker's", "MH"), lty = 1:2)
+dev.off()

@@ -1,0 +1,213 @@
+
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #############################################
+> ###  Optimal acceptance rate versus dimension
+> #############################################
+> library(Rfast)
+Loading required package: Rcpp
+Loading required package: RcppZiggurat
+> library(mcmcse)
+mcmcse: Monte Carlo Standard Errors for MCMC
+Version 1.4-1 created on 2020-01-29.
+copyright (c) 2012, James M. Flegal, University of California, Riverside
+                    John Hughes, University of Colorado, Denver
+                    Dootika Vats, University of Warwick
+                    Ning Dai, University of Minnesota
+ For citation information, type citation("mcmcse").
+ Type help("mcmcse-package") to get started.
+
+> 
+> AR.step <- function(current, sigma, alpha = "mh"){         
++   # Accept - reject step
++   # current = current state of the chain
++   # sigma   = standard deviation of the gaussian proposal
++   # alpha   = If "barker" specified then Barker's acceptance function, else M-H acceptance function
++   
++   d <- length(current)
++   y <- rmvnorm(1, mu = current, sigma = diag(sigma^2, d))
++   s <- dmvnorm(y, mu = rep(0, d), sigma = diag(d))/dmvnorm(current, mu = rep(0, d), sigma = diag(d))
++   
++   if(alpha == "barker"){
++     a = s/(1+s)
++   }else{
++     a = min(1, s)
++   }
++  
++   u <- runif(1)
++   if(u <= a){
++     return(c(y, 1))
++   }
++   else{
++     return(c(current, 0))
++   }
++ }
+> 
+> AR.sample <- function(init, N, sigma, K, alpha = "mh"){
++   # Accept reject MCMC sample: Returns a list of batch means and acceptance function
++   # init   = initial value X0
++   # N      = size of the sample
++   # sigma  = standard deviation of the gaussian proposal
++   # K      = batch-size
++   # alpha  = If "barker" specified then Barker's acceptance function, else M-H acceptance function
++   
++   d <- length(init)
++   b <- numeric(d)
++   step <- matrix(0, nrow = N, ncol = d)   # batch means
++   a <- 0
++   
++   step[1, ] <- init
++   for(i in 2:N){
++      foo <-  AR.step(step[i-1, ], sigma, alpha)
++      step[i,] <- foo[1:d]
++      a <- a + foo[d+1]
++ 
++   }
++   return(list(step, a/N))
++ }
+> 
+> 
+> N = 1e6
+> d = 1:10
+> K = 1000      #batch size
+> ###########################################################
+> #### Minimizing variance between Batch means (M-H) Algorithm
+> ###########################################################
+> 
+> sigma_mh <- numeric(length = length(d))   # optimal sigma
+> a_mh <- numeric(length = length(d))       # optimal acceptance 
+> init <- numeric()
+> 
+> for(j in 1:length(d)){
++   print(paste0("Doing for d = ", d[j]))
++   sigma <- seq(2/sqrt(d[j]), 3/sqrt(d[j]), length.out = 21)
++   eff_j <- numeric(length = length(sigma))
++   a_j <- numeric(length = length(sigma))
++   
++   init <- c(init, rnorm(1, 0, 1))
++   
++   for(i in 1:length(sigma)){
++     samp <- AR.sample(init, N, sigma[i], K)
++     e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
++     a_j[i] <- samp[[2]]
++     eff_j[i] <- mean(e)
++     cat("\r", i)
++   }
++   sigma_mh[j] <- sigma[which.min(eff_j)]
++   a_mh[j] <- a_j[which.min(eff_j)]
++   print(paste0("Done for d = ", j))
++ }
+[1] "Doing for d = 1"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 1"
+[1] "Doing for d = 2"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 2"
+[1] "Doing for d = 3"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 3"
+[1] "Doing for d = 4"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 4"
+[1] "Doing for d = 5"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 5"
+[1] "Doing for d = 6"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 6"
+[1] "Doing for d = 7"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 7"
+[1] "Doing for d = 8"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 8"
+[1] "Doing for d = 9"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 9"
+[1] "Doing for d = 10"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 10"
+> 
+> pdf("acc_mh.pdf", height = 6, width = 6)
+> plot(d, a_mh, xlab = "Dimensions", ylab = "Optimal acceptance (M-H)", type = "b", pch = 16)
+> dev.off()
+null device 
+          1 
+> save(a_mh,sigma_mh, eff_j , file = "opt_MH")
+> 
+> 
+> ###########################################################
+> #### Minimizing variance between Batch means (Barker Algorithm)
+> ###########################################################
+> 
+> sigma_b <- numeric(length = length(d))     # Optimal Sigma
+> a_b <- numeric(length = length(d))        # Optimal acceptance
+> init <- numeric()
+> 
+> for(j in 1:length(d)){
++   print(paste0("Doing for d = ", d[j]))
++   sigma <- seq(2/sqrt(d[j]), 3/sqrt(d[j]), length.out = 21)
++   eff_jb <- numeric(length = length(sigma))
++   a_j <- numeric(length = length(sigma))
++   
++   init <- c(init, rnorm(1, 0, 1))
++   
++   for(i in 1:length(sigma)){
++     samp <- AR.sample(init, N, sigma[i], K, alpha = "barker")
++     e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
++     a_j[i] <- samp[[2]]
++     eff_jb[i] <- mean(e)
++     cat("\r", i)
++   }
++   sigma_b[j] <- sigma[which.min(eff_jb)]
++   a_b[j] <- a_j[which.min(eff_j)]
++   print(paste0("Done for d = ", j))
++ }
+[1] "Doing for d = 1"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 1"
+[1] "Doing for d = 2"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 2"
+[1] "Doing for d = 3"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 3"
+[1] "Doing for d = 4"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 4"
+[1] "Doing for d = 5"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 5"
+[1] "Doing for d = 6"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 6"
+[1] "Doing for d = 7"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 7"
+[1] "Doing for d = 8"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 8"
+[1] "Doing for d = 9"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 9"
+[1] "Doing for d = 10"
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21[1] "Done for d = 10"
+> 
+> pdf("acc_bark.pdf", height = 6, width = 6)
+> plot(d, a_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
+> dev.off()
+null device 
+          1 
+> save(a_b, sigma_b, eff_jb , file = "opt_bark")
+> a_b
+ [1] 0.264921 0.219557 0.199886 0.188883 0.181128 0.175789 0.172058 0.168300
+ [9] 0.167894 0.164718
+> 
+> pdf("acc_both.pdf", height = 6, width = 6)
+> plot(d, a_b, ylim = c(.18,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
+> lines(d, a_mh, type = "b", pch = 16, lty = 2)
+> legend("topright", legend = c("Barker's", "MH"), lty = 1:2)
+> dev.off()
+null device 
+          1 
+> 
+> proc.time()
+     user    system   elapsed 
+28890.428    73.979 28979.917 

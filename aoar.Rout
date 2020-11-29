@@ -1,0 +1,136 @@
+
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> N = 1e6   ## Sample size
+> n = 1e2    ## No. of samples
+> x = 0
+> 
+> i.grand <- function(z, theta){              ## Integrand in h(theta)
++   temp <- -z*sqrt(theta) + theta/2
++   ig <- (1 + exp(temp))^(-1)
++   
++   return(mean(ig))
++ }
+> 
+> mc <- function(seed, N, theta){             ## Estimates integral for different theta 
++   set.seed(seed + x)
++   est <- numeric(length = length(theta))
++   samp <- rnorm(N, mean = 0, sd = 1)
++   for(i in 1:length(theta)){
++     vals = theta[i]*i.grand(samp, theta[i])
++     est[i] = mean(vals)
++   }
++   return(est)
++ }
+> 
+> pdf("finding_l.pdf", height = 6, width = 10)
+> par(mfrow = c(1, 2))
+> 
+> ##########################################################################
+> ######  GLOBAL 
+> ##########################################################################
+> 
+> theta = seq(0, 10, by = 0.1)
+> est <- matrix(0, nrow = n, ncol = length(theta))
+> 
+> for(i in 1:n){
++   est[i, ] <- mc(i, N = N, theta = theta)
++   cat("\r", i)
++ }
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100> 
+> final <- colMeans(est)
+> plot(theta, final, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+> abline(v = 6.02)
+> 
+> # ##########################################################################
+> # ######  ZOOMING IN
+> # ##########################################################################
+> 
+> # theta1 = seq(4, 7, by = 0.01)
+> # est1 <- matrix(0, nrow = n, ncol = length(theta1))
+> # for(i in 1:n){
+> #   est1[i, ] <- mc(i, N = N, theta = theta1)
+> #   cat("\r", i)
+> # }
+> 
+> # final1 <- colMeans(est1)
+> # plot(theta1, final1, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+> # abline(v = 5.75)
+> # abline(v = 6.25)
+> 
+> # ##########################################################################
+> # ######  ZOOMING IN
+> # ##########################################################################
+> 
+> # theta2 = seq(5.751, 6.249, by = 0.001)
+> # est2 <- matrix(0, nrow = n, ncol = length(theta2))
+> # for(i in 1:n){
+> #   est2[i, ] <- mc(i, N = N, theta = theta2)
+> #   cat("\r", i)
+> # }
+> 
+> # final2 <- colMeans(est2)
+> # plot(theta2, final2, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+> # abline(v = 5.975)
+> # abline(v = 6.075)
+> 
+> ##########################################################################
+> ######  Final
+> ##########################################################################
+> 
+> theta3 = seq(6.0315, 6.033, length = 5e2)
+> est3 <- matrix(0, nrow = n, ncol = length(theta3))
+> for(i in 1:n){
++   est3[i, ] <- mc(i, N = N, theta = theta3)
++   cat("\r", i)
++ }
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100> 
+> final3 <- colMeans(est3)
+> plot(theta3, final3, type = "l", col = "blue", xlab = expression(theta), ylab = expression(h(theta)))
+> t.max <- theta3[which.max(final3)]                        ## Optimum value of theta. l is then sqrt(theta/I) for any I
+> abline(v = t.max)
+> print(t.max)
+[1] 6.032462
+> 
+> l <- sqrt(t.max)
+> print(l) # 2.456109
+[1] 2.456107
+> 
+> ##########################################################################
+> ######  Average Optimal Acceptance rate (AOAR)
+> ##########################################################################
+> 
+> # Theoretical
+> aoar <- numeric(length = 1e2)
+> for(t in 1:1e2)
++ {
++   cat("\r", t)
++   foo <- rnorm(1e8, mean = 0, sd = 1)
++   aoar[t] <- i.grand(foo, t.max)
++ }
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100> 
+> # .1589796
+> print(mean(aoar))
+[1] 0.1589797
+> 
+> 
+> 
+> proc.time()
+    user   system  elapsed 
+2465.374   88.312 2561.271 

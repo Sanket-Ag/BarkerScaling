@@ -1,4 +1,4 @@
-N = 1e4    ## Sample size
+N = 1e6   ## Sample size
 n = 1e2    ## No. of samples
 x = 0
 
@@ -6,7 +6,7 @@ i.grand <- function(z, theta){              ## Integrand in h(theta)
   temp <- -z*sqrt(theta) + theta/2
   ig <- (1 + exp(temp))^(-1)
   
-  return(ig)
+  return(mean(ig))
 }
 
 mc <- function(seed, N, theta){             ## Estimates integral for different theta 
@@ -20,7 +20,8 @@ mc <- function(seed, N, theta){             ## Estimates integral for different 
   return(est)
 }
 
-par(mfrow = c(2, 2))
+pdf("finding_l.pdf", height = 6, width = 10)
+par(mfrow = c(1, 2))
 
 ##########################################################################
 ######  GLOBAL 
@@ -36,46 +37,45 @@ for(i in 1:n){
 
 final <- colMeans(est)
 plot(theta, final, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
-abline(v = 4)
-abline(v = 7)
+abline(v = 6.02)
 
-##########################################################################
-######  ZOOMING IN
-##########################################################################
+# ##########################################################################
+# ######  ZOOMING IN
+# ##########################################################################
 
-theta1 = seq(4, 7, by = 0.01)
-est1 <- matrix(0, nrow = n, ncol = length(theta1))
-for(i in 1:n){
-  est1[i, ] <- mc(i, N = N, theta = theta1)
-  cat("\r", i)
-}
+# theta1 = seq(4, 7, by = 0.01)
+# est1 <- matrix(0, nrow = n, ncol = length(theta1))
+# for(i in 1:n){
+#   est1[i, ] <- mc(i, N = N, theta = theta1)
+#   cat("\r", i)
+# }
 
-final1 <- colMeans(est1)
-plot(theta1, final1, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
-abline(v = 5.75)
-abline(v = 6.25)
+# final1 <- colMeans(est1)
+# plot(theta1, final1, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+# abline(v = 5.75)
+# abline(v = 6.25)
 
-##########################################################################
-######  ZOOMING IN
-##########################################################################
+# ##########################################################################
+# ######  ZOOMING IN
+# ##########################################################################
 
-theta2 = seq(5.751, 6.249, by = 0.001)
-est2 <- matrix(0, nrow = n, ncol = length(theta2))
-for(i in 1:n){
-  est2[i, ] <- mc(i, N = N, theta = theta2)
-  cat("\r", i)
-}
+# theta2 = seq(5.751, 6.249, by = 0.001)
+# est2 <- matrix(0, nrow = n, ncol = length(theta2))
+# for(i in 1:n){
+#   est2[i, ] <- mc(i, N = N, theta = theta2)
+#   cat("\r", i)
+# }
 
-final2 <- colMeans(est2)
-plot(theta2, final2, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
-abline(v = 5.975)
-abline(v = 6.075)
+# final2 <- colMeans(est2)
+# plot(theta2, final2, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+# abline(v = 5.975)
+# abline(v = 6.075)
 
 ##########################################################################
 ######  Final
 ##########################################################################
 
-theta3 = seq(5.9751, 6.0749, by = 0.0005)
+theta3 = seq(6.0315, 6.033, length = 5e2)
 est3 <- matrix(0, nrow = n, ncol = length(theta3))
 for(i in 1:n){
   est3[i, ] <- mc(i, N = N, theta = theta3)
@@ -83,22 +83,28 @@ for(i in 1:n){
 }
 
 final3 <- colMeans(est3)
-plot(theta3, final3, type = "l", col = "blue", xlab = "theta", ylab = "h(theta)")
+plot(theta3, final3, type = "l", col = "blue", xlab = expression(theta), ylab = expression(h(theta)))
 t.max <- theta3[which.max(final3)]                        ## Optimum value of theta. l is then sqrt(theta/I) for any I
 abline(v = t.max)
 print(t.max)
 
 l <- sqrt(t.max)
-print(l)
+print(l) # 2.456109
 
 ##########################################################################
 ######  Average Optimal Acceptance rate (AOAR)
 ##########################################################################
 
 # Theoretical
-foo <- rnorm(1e6, mean = 0, sd = 1)
-vals <- i.grand(foo, t.max)
-aoar <- mean(vals)
-print(aoar)
+aoar <- numeric(length = 1e2)
+for(t in 1:1e2)
+{
+  cat("\r", t)
+  foo <- rnorm(1e8, mean = 0, sd = 1)
+  aoar[t] <- i.grand(foo, t.max)
+}
+
+# .1589796
+print(mean(aoar))
 
 
