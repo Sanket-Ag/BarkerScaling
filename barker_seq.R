@@ -1,10 +1,10 @@
-N <- 1e4 #sample size for estimating the expectation
+N <- 1e5 #sample size for estimating the expectation
 n <- 1e4 #number of values for theta to be evaluated between 0 and 10.
 r <- 1:10 #for different values of r
 set.seed(16)
 
 vals <- list()
-theta <- seq(0.1, 10, length.out = n)
+theta <- seq(5, 6, length.out = n)
 
 g <- function(z, r){   # Calculates g_{r}(e^z)
   s <- exp(z)
@@ -12,11 +12,11 @@ g <- function(z, r){   # Calculates g_{r}(e^z)
   
   return(temp)
 }
-
+z <- rnorm(N, mean = 0, sd = 1)
 for(i in 1:length(r)){
-  
+  print(i)
   vals[[i]] <- list()   #  Store values for each r -- h(theta), 
-  z <- rnorm(N, mean = 0, sd = 1)
+
   h <- numeric(length = n) 
   
   for(j in 1:n){
