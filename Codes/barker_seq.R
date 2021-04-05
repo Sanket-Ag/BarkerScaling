@@ -1,10 +1,10 @@
 #################################################################
-## Finding AOAR and optimal variance for Bedard's acceptance 
-## probability corresponding to different values of h. 
+## Finding AOAR and optimal variance for Generalized Barker's  
+## acceptance probability corresponding to different values of r. 
 #################################################################
 
-# This computation follows the steps described in Appendix C
-# of the main paper.
+# This computation is based on Monte Calro aproximation
+# since numerical integration is somewhat unstable.
 
 set.seed(16)
 
@@ -64,15 +64,15 @@ for(i in 1:length(r)){
 
 ########### Exporting values
 barker <- list(r, lhat, acc)
-save(barker, file = "barker.result")
+# save(barker, file = "barker.result")
 
 
 ########### Plotting optimal acceptance
-#pdf("barker.pdf", width = 6, height = 6)
+pdf("Plots/Gen_barker.pdf", width = 6, height = 6)
 plot(r, acc, type = "b", pch = 16, ylim = c(0.155, 0.24), ylab = "optimal acceptance", xlab = "r")
 abline(h = 0.234, lty = 2)
 text(x = 1.1, y = 0.23, labels = "0.234", cex = 0.8)
-#dev.off()
+dev.off()
 
 
 

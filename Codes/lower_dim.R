@@ -151,22 +151,22 @@ for(j in 1:length(d)){
   print(paste0("Done for d = ", j))
 }
 
-pdf("acc_bark.pdf", height = 6, width = 6)
-plot(d, a_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
-dev.off()
+# pdf("acc_bark.pdf", height = 6, width = 6)
+# plot(d, a_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
+# dev.off()
 
-pdf("acc_bark_Corr.pdf", height = 6, width = 6)
-plot(d, aC_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
-dev.off()
+# pdf("acc_bark_Corr.pdf", height = 6, width = 6)
+# plot(d, aC_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
+# dev.off()
 
-save(a_b, sigma_b, eff_b, effC_b, sigmaC_b, aC_b, file = "opt_bark")
-a_b
+# save(a_b, sigma_b, eff_b, effC_b, sigmaC_b, aC_b, file = "opt_bark")
+# a_b
 
-pdf("acc_both.pdf", height = 6, width = 6)
-plot(d, a_b, ylim = c(.14,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
-lines(d, a_mh, type = "b", pch = 16, lty = 2)
-legend("topright", legend = c("Barker's", "MH"), lty = 1:2)
-dev.off()
+# pdf("acc_both.pdf", height = 6, width = 6)
+# plot(d, a_b, ylim = c(.14,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
+# lines(d, a_mh, type = "b", pch = 16, lty = 2)
+# legend("topright", legend = c("Barker's", "MH"), lty = 1:2)
+# dev.off()
 
 pdf("acc_both_Corr.pdf", height = 6, width = 6)
 plot(d, aC_b, ylim = c(.14,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")

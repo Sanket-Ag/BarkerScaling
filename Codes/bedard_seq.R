@@ -22,13 +22,13 @@ for(i in 1:length(h)){
 
 ########### Exporting values
 bedard <- list(h, lhat, aoar)
-save(bedard, file = "bedard.result")
+# save(bedard, file = "bedard.result")
 
 ########### Plotting optimal acceptance
-#pdf("bedard.pdf", width = 6, height = 6)
+pdf("Plots/bedard.pdf", width = 6, height = 6)
 plot(h, aoar, type = "l", xlab = expression(h), ylab = "optimal acceptance")
 abline(h = 0.158, lty = 2)
 abline(v = 1.913, lty = 2)
 text(x = 2.1, y = 0.21, labels = expression(h ~ "= 1.913"), srt = 90, cex = 0.8)
 text(x = 9.6, y = 0.165, labels = expression(alpha ~ "= 0.158"), cex = 0.8)
-#dev.off()
+dev.off()

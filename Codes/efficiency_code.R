@@ -24,17 +24,17 @@ for(i in 1:length(l))
 
 # Plotting h(l) versus acceptance rate
 
-#pdf("eff_vs_acc.pdf", height = 4, width = 6)
+pdf("Plots/eff_vs_acc.pdf", height = 4, width = 6)
 plot(mh_seq, l^2*mh_seq, type = "l", lty = 2, xlab = "Acceptance rate", ylab = "Efficiency")
 lines(bark_seq, l^2*bark_seq,  lty = 1)
 abline(v = c(bark_seq[which.max(l^2*bark_seq)], mh_seq[which.max(l^2*mh_seq)]), lty = c(1,2))
 legend("topright", legend = c("Barker's", "MH"), lty = c(1, 2), cex = 0.8)
 text(x = 0.1277295, y = 0.2, labels = expression(alpha ~ "= 0.158"), srt = 90, cex = 0.7)
 text(x = 0.266722, y = 0.2, labels = expression(alpha ~ "= 0.234"), srt = 90, cex = 0.7)
-#dev.off()
+dev.off()
 
 # Plotting h(l) versus l
 # Comparison for barker's and MH.
-#pdf("ratio.pdf", height = 4, width = 6)
+pdf("Plots/ratio.pdf", height = 4, width = 4)
 plot(l, bark_seq/mh_seq, type = "l", xlab = expression(l), ylab = "Relative efficiency")
-#dev.off()
+dev.off()
