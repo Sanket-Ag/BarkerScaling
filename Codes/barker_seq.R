@@ -3,7 +3,7 @@
 ## acceptance probability corresponding to different values of r. 
 #################################################################
 
-# This computation is based on Monte Calro aproximation
+# This computation is based on Monte Carlo aproximation
 # since numerical integration is somewhat unstable.
 
 set.seed(16)
@@ -74,6 +74,32 @@ abline(h = 0.234, lty = 2)
 text(x = 1.1, y = 0.23, labels = "0.234", cex = 0.8)
 dev.off()
 
+######################################################################################
+######################################################################################
+## Finding optimal values for Barker's acceptance function using numerical integration
+## in R
+#######################################################################################
+
+func_barker <- function(x, l)
+{
+  # Calculates integrand for finding M_B(l)
+  foo <- x - log(1 + exp(x)) - log(2*pi*l^2)/2 - (x + l^2/2)^2/(2*l^2)
+  return(exp(foo))
+}
+
+l <- seq(0.01, 10, length = 1e3)
+bark_seq <- numeric(length(l))
+
+for(i in 1:length(l))
+{
+  bark_seq[i] <- integrate(func_barker, lower = -Inf, upper = Inf, l = l[i])$value
+}
+
+k <- which.max(l^2*bark_seq)
+lhat <- l[k]
+aoar <- bark_seq[k]
+
+paste("lhat: ", lhat, " AOAR: ", round(aoar, 3))
 
 
 
