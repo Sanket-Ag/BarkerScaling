@@ -7,102 +7,94 @@
 
 
 library(mcmcse)
+library(tictoc)
 
+sampler <- function(samp, ar_step, sigma){
+ 
+  # samp : the matrix containing draws from N(0, 1). Used to generate proposals and store the MC.
+  # ar_step : a random uniform draw used at the accpet-reject step
+  # sigma : proposal standard deviation
 
-AR.sample <- function(init, sigma){
-  
-
-  acc_prob <- 0
-  #xi[1, ] <- init
+  acc_prob <- 0        # keeps track of the no. of acceptances
 
   for(i in 2:N){
-    temp <- (2*sigma*sum(xi[i-1, ]*xi[i, ]) + sigma*sigma*sum(xi[i, ]*xi[i, ]))/2
-    one_by_a <- 1 + exp(temp)
 
-    if(1/runif(1) >= one_by_a){
-      xi[i, ] <- xi[i-1, ] + sigma*xi[i, ]
+    curr <- samp[i-1, ]                       # current state
+    prop <- samp[i-1, ] + sigma*samp[i, ]     # proposed state
+    temp <- sum(dnorm(prop, log = TRUE) - dnorm(samp[i-1, ], log = TRUE))
+    one_by_a <- 1 + exp(-temp)
+
+    if(1/ar_step >= one_by_a){
+      samp[i, ] <- prop
       acc_prob <- acc_prob + 1
     }
     else{
-      xi[i, ] <- xi[i-1, ]
+      samp[i, ] <- curr
     }
   }
 
-  return(list(xi, acc_prob/N))
+  return(list(samp, acc_prob/N))
 }
 
 
-N = 1e6
-d = 50
-K = 100      #batch size
+#############################################
+# Parameters
 
-set.seed(567)
-xi <- matrix(rnorm(d*N, mean = 0, sd = 1), ncol = d, byrow = T)
+M <- 1e3  # no. of iterations
+N <- 1e6  # length of the chain
+d <- 50   # dimensions
+K <- 100  # batch size
+sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
 
 
-###########################################################
-#### Minimizing variance between Batch means (Barker Algorithm)
-###########################################################
+##############################################
+# Variables to store data
 
-sigma_b <- numeric(length = length(d))     # Optimal Sigma
-a_b <- numeric(length = length(d))        # Optimal acceptance
-eff_b <- numeric(length = length(d)) 
+eff_bm <- matrix(0, nrow = M, ncol = length(sigma))      # Store the batch means se calculated using mcmcse package 
+eff_fc <- matrix(0, nrow = M, ncol = length(sigma))      # Stores first order autocorrelation
+acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
-sigmaC_b <- numeric(length = length(d))     # Optimal Sigma
-aC_b <- numeric(length = length(d))        # Optimal acceptance
-effC_b <- numeric(length = length(d)) 
-init <- numeric()
+tic()
 
-for(j in 1:length(d)){
+for(j in 1:M){
 
-  #print(paste0("Doing for d = ", d[j]))
+  print(paste0("Doing for m = ", j))
 
-  sigma <- seq(2/sqrt(d[j]), 3/sqrt(d[j]), length.out = 51)
-  eff_jb <- numeric(length = length(sigma))
+  set.seed(j)
+  xi <- matrix(rnorm(d*N, mean = 0, sd = 1), ncol = d)
+  prob <- runif(1)
+
+  bm_j <- numeric(length = length(sigma))
+  fc_j <- numeric(length = length(sigma))
   a_j <- numeric(length = length(sigma))
-  
-  first_corr <- numeric(length = length(sigma))
-  init <- c(init, rnorm(1, 0, 1))
-  
-  for(i in 1:length(sigma)){
-  
-    print(paste0("Doing for sigma = ", sigma[i]))
 
-    samp <- AR.sample(init, sigma[i])
+  for(i in 1:length(sigma)){
+
+    samp <- sampler(samp = xi, ar_step = prob, sigma = sigma[i])
     e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
     a_j[i] <- samp[[2]]
-    eff_jb[i] <- mean(e)
+    bm_j[i] <- mean(e)
 
     # minimum autocorrelation
-    first_corr[i] <- mean(diag(matrix(cor(samp[[1]][-1,], samp[[1]][-N,]), ncol = d[j], nrow = d[j]) ))
+    fc_j[i] <- mean(diag(matrix(cor(samp[[1]][-1,], samp[[1]][-N,]), ncol = d, nrow = d) ))
     cat("\r", i)
   }
   
-  eff_b[j] <- which.min(eff_jb)  
-  sigma_b[j] <- sigma[ eff_b[j] ]
-  a_b[j] <- a_j[ eff_b[j] ]
-
-  effC_b[j] <- which.min(first_corr)
-  sigmaC_b[j] <- sigma[effC_b[j]]
-  aC_b[j] <- a_j[effC_b[j]]  
-  print(paste0("Done for d = ", j))
+  eff_bm[j, ] <- bm_j  
+  eff_fc[j, ] <- fc_j
+  acc_rate[j, ] <- a_j
+ 
+  print(paste0("Done for m = ", j))
 }
 
-pdf("acc_bark.pdf", height = 6, width = 6)
-plot(sigma, eff_jb, xlab = "sigma", ylab = "1/Efficiency", type = "l", col = "blue")
-plot(sigma, first_corr, xlab = "sigma", ylab = "1/Efficiency", type = "l", col = "blue")
-dev.off()
+toc()
 
 
-# pdf("acc_bark_Corr.pdf", height = 6, width = 6)
-# plot(d, aC_b, xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b", pch = 16)
-# dev.off()
+#########################################
+# Save the results
+res <- list(sigma, eff_bm, eff_fc, acc_rate)
+save <- (res, file = "multi_gaussian")
 
-# save(a_b, sigma_b, eff_b, effC_b, sigmaC_b, aC_b, file = "opt_bark")
-# a_b
 
-# pdf("acc_both.pdf", height = 6, width = 6)
-# plot(d, a_b, ylim = c(.14,.5), xlab = "Dimensions", ylab = "Optimal acceptance (Barker's)", type = "b")
-# lines(d, a_mh, type = "b", pch = 16, lty = 2)
-# legend("topright", legend = c("Barker's", "MH"), lty = 1:2)
-# dev.off()
+############################################################################################################
+# END
