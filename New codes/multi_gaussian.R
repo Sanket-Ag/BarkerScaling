@@ -21,10 +21,10 @@ sampler <- function(samp, ar_step, sigma){
 
     curr <- samp[i-1, ]                       # current state
     prop <- samp[i-1, ] + sigma*samp[i, ]     # proposed state
-    temp <- sum(dnorm(prop, log = TRUE) - dnorm(samp[i-1, ], log = TRUE))
-    one_by_a <- 1 + exp(-temp)
+    temp <- sum(dnorm(prop, log = TRUE) - dnorm(curr, log = TRUE))
+    a <- exp(temp)/(1 + exp(temp))
 
-    if(1/ar_step >= one_by_a){
+    if(ar_step[i] <= a){
       samp[i, ] <- prop
       acc_prob <- acc_prob + 1
     }
@@ -41,7 +41,7 @@ sampler <- function(samp, ar_step, sigma){
 # Parameters
 
 M <- 1e3  # no. of iterations
-N <- 1e6  # length of the chain
+N <- 1e5  # length of the chain
 d <- 50   # dimensions
 K <- 100  # batch size
 sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
@@ -62,7 +62,7 @@ for(j in 1:M){
 
   set.seed(j)
   xi <- matrix(rnorm(d*N, mean = 0, sd = 1), ncol = d)
-  prob <- runif(1)
+  prob <- runif(N)
 
   bm_j <- numeric(length = length(sigma))
   fc_j <- numeric(length = length(sigma))
@@ -93,7 +93,7 @@ toc()
 #########################################
 # Save the results
 res <- list(sigma, eff_bm, eff_fc, acc_rate)
-save <- (res, file = "multi_gaussian")
+save(res, file = "multi_gaussian")
 
 
 ############################################################################################################
