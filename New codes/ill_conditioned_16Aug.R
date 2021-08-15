@@ -9,23 +9,23 @@
 
 ########### Defining Target ##################
 
-library(pracma)   # Generating a random Orthonormal matrix
+#install.packages("randcorr")
+library(randcorr)   # Generating a random Correlation matrix
 
 d = 50
-ev <- seq(0.1, 1, length.out = 30)
-ev <- c(ev , seq(2, 100, length.out = 20))
+v <- seq(0.1, 1, length.out = 30)
+v <- c(v , seq(2, 100, length.out = 20))
 
 set.seed(0)
-ev <- sample(ev)
-Q <- randortho(n = d, type = "orthonormal")
-E <- Q%*%diag(ev)%*%t(Q)
+P <- randcorr(d)
+E <- diag(sqrt(v))%*%P%*%diag(sqrt(v))   # E is the covariance matrix
 
-#E_inv <- Q%*%diag(1/ev)%*%t(Q)         
+S <- eigen(E)         
 
 # Suppose E_inv = t(L)%*%L is the inverse of the civariance matrix of our target distribution
 # then L is given in the next line. We only store L since that is all we would need.
 
-L <- diag(sqrt(1/ev))%*%t(Q)
+L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 
 
 library(mcmcse)
@@ -64,10 +64,10 @@ sampler <- function(samp, ar_step, init, sigma){
 #############################################
 # Parameters
 
-M <- 5e2    # no. of iterations
+M <- 5e2   # no. of iterations
 N <- 1e5  # length of the chain
 K <- 2000  # batch size
-sigma <- seq(1.5/sqrt(d), 2.5/sqrt(d), length.out = 51)
+sigma <- seq(0.3/sqrt(d), 0.5/sqrt(d), length.out = 51)
 
 
 ##############################################
@@ -129,10 +129,10 @@ toc()
 # Save the results
 
 res <- list(sigma, eff_bm, eff_fc, eff_ess, eff_ct, acc_rate)
-save(res, file = "ill_gaussian_15Aug")
+save(res, file = "ill_gaussian_16Aug")
 
 # Plots
-pdf(file = "ill_gaussian_plots_15Aug.pdf")
+pdf(file = "ill_gaussian_plots_16Aug.pdf")
 plot(sigma, colMeans(acc_rate), type = "l")
 plot(colMeans(acc_rate), colMeans(eff_bm), type = "l")
 plot(colMeans(acc_rate), colMeans(eff_fc), type = "l")
