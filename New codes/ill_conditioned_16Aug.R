@@ -10,6 +10,8 @@
 ########### Defining Target ##################
 
 #install.packages("randcorr")
+library(doParallel)
+
 library(randcorr)   # Generating a random Correlation matrix
 
 d = 50
@@ -64,8 +66,8 @@ sampler <- function(samp, ar_step, init, sigma){
 #############################################
 # Parameters
 
-M <- 5e2   # no. of iterations
-N <- 1e5  # length of the chain
+M <- 1e2   # no. of iterations
+N <- 1e6  # length of the chain
 K <- 2000  # batch size
 sigma <- seq(0.3/sqrt(d), 0.5/sqrt(d), length.out = 51)
 
@@ -79,10 +81,13 @@ eff_ct <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimate of co
 eff_ess <- matrix(0, nrow = M, ncol = length(sigma))     # Stores multiESS()
 acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
-tic()
+# Number of cores
+detectCores()
+registerDoParallel(cores = detectCores()-2)
 
-for(j in 1:M){
 
+doingReps <- function(j)
+{
   print(paste0("Doing for m = ", j))
 
   set.seed(j)
@@ -113,17 +118,27 @@ for(j in 1:M){
     cat("\r", i)
   }
   
-  eff_bm[j, ] <- bm_j  
-  eff_fc[j, ] <- fc_j
-  eff_ct[j, ] <- ct_j
-  eff_ess[j, ] <- ess_j
-  acc_rate[j, ] <- a_j
- 
   print(paste0("Done for m = ", j))
+  return(cbind(bm_j, fc_j, ct_j, ess_j, a_j))
+ 
+}
+
+tic()
+foo <- foreach(j = 1:M) %dopar% 
+{
+  doingReps(j)
 }
 
 toc()
 
+final.out <- array(unlist(foo), dim = c(length(sigma), 5, M))
+
+
+eff_bm <- t(final.out[,1, ])
+eff_fc <- t(final.out[,2, ])
+eff_ct <- t(final.out[,3, ])
+eff_ess <- t(final.out[,4, ])
+acc_rate <- t(final.out[,5, ])
 
 #########################################
 # Save the results
