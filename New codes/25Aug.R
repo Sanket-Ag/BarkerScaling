@@ -6,19 +6,8 @@
 ##############################################################################################
 
 
-########### Defining Target (rho = 0.85) ##################
-
-d = 50
-E <- matrix(0.85, nrow = d, ncol = d)
-diag(E) <- 1
-S <- eigen(E)
-
-# Suppose E_inv = t(L)%*%L is the inverse of the civariance matrix of our target distribution
-# then L is given in the next line. We only store L since that is all we would need.
-
-L <- diag(sqrt(1/S$values))%*%t(S$vectors)
-
-
+library(doParallel)
+library(tictoc)
 library(mvtnorm)
 
 sampler <- function(samp, ar_step, init, sigma){
@@ -49,6 +38,31 @@ sampler <- function(samp, ar_step, init, sigma){
   return(list(samp, acc_prob/N))
 }
 
+
+
+
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+# First we will do for rho = 0.85
+# Same code will then be used for rho = 0.4 case.
+
+
+########### Defining Target (rho = 0.85) ##################
+
+d = 50
+E <- matrix(0.85, nrow = d, ncol = d)
+diag(E) <- 1
+S <- eigen(E)
+
+# Suppose E_inv = t(L)%*%L is the inverse of the civariance matrix of our target distribution
+# then L is given in the next line. We only store L since that is all we would need.
+
+L <- diag(sqrt(1/S$values))%*%t(S$vectors)
+
+
+
 #############################################
 # Parameters
 
@@ -65,10 +79,13 @@ eff_ct <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated conv
 acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
 
-foo <- proc.time()
+# Number of cores
+detectCores()
+registerDoParallel(cores = detectCores()-2)
 
-for(j in 1:M){
 
+doingReps <- function(j)
+{
   print(paste0("Doing for m = ", j))
 
   set.seed(j)
@@ -92,15 +109,23 @@ for(j in 1:M){
     ct_j[i] <- cor(x[-1], x[-N])
    
   }
-
-  eff_fc[j, ] <- fc_j
-  eff_ct[j, ] <- ct_j
-  acc_rate[j, ] <- a_j
-
+  
+  return(cbind(fc_j, ct_j, a_j))
+ 
 }
 
-proc.time() - foo
+tic()
+foo <- foreach(j = 1:M) %dopar% 
+{
+  doingReps(j)
+}
+toc()
 
+final.out <- array(unlist(foo), dim = c(length(sigma), 3, M))
+
+eff_fc <- t(final.out[ ,1, ])
+eff_ct <- t(final.out[ ,2, ])
+acc_rate <- t(final.out[ ,3, ])
 
 #########################################
 # Save the results
@@ -117,6 +142,10 @@ plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", 
 dev.off()
 
 
+
+
+############################################################################################################
+############################################################################################################
 ############################################################################################################
 # Now we will do for rho = 0.4
 # The code remains same as above. Only the description of the target changes.
@@ -136,6 +165,9 @@ S <- eigen(E)
 L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 
 
+#############################################
+# Parameters
+
 M <- 1e3    # no. of iterations
 N <- 1e5    # length of the chain
 sigma <- seq(1.5/sqrt(d), 2.5/sqrt(d), length.out = 51)
@@ -149,9 +181,12 @@ eff_ct <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated conv
 acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
 
-foo <- proc.time()
+# Number of cores
+detectCores()
+registerDoParallel(cores = detectCores()-2)
 
-for(j in 1:M){
+
+doingReps <- function(j){
 
   print(paste0("Doing for m = ", j))
 
@@ -177,23 +212,32 @@ for(j in 1:M){
    
   }
 
-  eff_fc[j, ] <- fc_j
-  eff_ct[j, ] <- ct_j
-  acc_rate[j, ] <- a_j
+  return(cbind(fc_j, ct_j, a_j))
 
 }
 
-proc.time() - foo
+tic()
+foo <- foreach(j = 1:M) %dopar% 
+{
+  doingReps(j)
+}
+toc()
+
+final.out <- array(unlist(foo), dim = c(length(sigma), 3, M))
+
+eff_fc <- t(final.out[ ,1, ])
+eff_ct <- t(final.out[ ,2, ])
+acc_rate <- t(final.out[ ,3, ])
 
 
 #########################################
 # Save the results
 
 res <- list(sigma, eff_fc, eff_ct, acc_rate)
-save(res, file = "25Aug_rho004")
+save(res, file = "25Aug_rho04")
 
 # Plots
-pdf(file = "25Aug_rho004.pdf")
+pdf(file = "25Aug_rho04.pdf")
 plot(sigma, colMeans(acc_rate), type = "l")
 abline(h = 0.158)
 plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
@@ -202,4 +246,3 @@ dev.off()
 
 ############################################################################################################
 # END
-
