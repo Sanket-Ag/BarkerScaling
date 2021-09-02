@@ -10,6 +10,8 @@ library(doParallel)
 library(tictoc)
 library(mvtnorm)
 
+set.seed(678)
+
 sampler <- function(samp, ar_step, init, sigma){
 
   # samp : the matrix containing draws from N(0, 1). Used to generate proposals and store the MC.
@@ -55,6 +57,8 @@ d = 50
 E <- matrix(0.85, nrow = d, ncol = d)
 diag(E) <- 1
 S <- eigen(E)
+E_half <- S$vectors%*%diag(sqrt(S$values))
+
 
 # Suppose E_inv = t(L)%*%L is the inverse of the civariance matrix of our target distribution
 # then L is given in the next line. We only store L since that is all we would need.
@@ -86,10 +90,9 @@ doingReps <- function(j)
 {
   print(paste0("Doing for m = ", j))
 
-  set.seed(j)
-  xi <- rmvnorm(N, mean = rep(0, d), sigma = E)
+  xi <- t(E_half%*%matrix(rnorm(N*d), nrow = d))
   prob <- runif(N)
-  init <- rmvnorm(1, mean = rep(0, d), sigma = E)
+  init <- E_half%*%rnorm(d)
 
   fc_j <- numeric(length = length(sigma))
   ct_j <- numeric(length = length(sigma))
@@ -150,12 +153,14 @@ dev.off()
 # Also the values of sigma.
 
 
-########### Defining Target (rho = 0.85) ##################
+########### Defining Target (rho = 0.4) ##################
 
 d = 50
 E <- matrix(0.4, nrow = d, ncol = d)
 diag(E) <- 1
 S <- eigen(E)
+E_half <- S$vectors%*%diag(sqrt(S$values))
+
 
 # Suppose E_inv = t(L)%*%L is the inverse of the civariance matrix of our target distribution
 # then L is given in the next line. We only store L since that is all we would need.
@@ -187,10 +192,9 @@ doingReps <- function(j){
 
   print(paste0("Doing for m = ", j))
 
-  set.seed(j)
-  xi <- rmvnorm(N, mean = rep(0,d), sigma = E)
+  xi <- t(E_half%*%matrix(rnorm(N*d), nrow = d))
   prob <- runif(N)
-  init <- rmvnorm(1, mean = rep(0, d), sigma = E)
+  init <- E_half%*%rnorm(d)
 
   fc_j <- numeric(length = length(sigma))
   ct_j <- numeric(length = length(sigma))
