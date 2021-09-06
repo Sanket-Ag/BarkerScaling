@@ -69,7 +69,7 @@ L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 # Parameters
 
 M <- 1e3   # no. of iterations
-N <- 1e5   # length of the chain
+N <- 1e6   # length of the chain
 sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
 
 
@@ -83,7 +83,7 @@ acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance pro
 
 # Number of cores
 detectCores()
-registerDoParallel(cores = detectCores()-2)
+registerDoParallel(cores = detectCores())
 
 
 doingReps <- function(j)
@@ -171,7 +171,7 @@ L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 # Parameters
 
 M <- 1e3    # no. of iterations
-N <- 1e5    # length of the chain
+N <- 1e6    # length of the chain
 sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
 
 
@@ -185,7 +185,7 @@ acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance pro
 
 # Number of cores
 detectCores()
-registerDoParallel(cores = detectCores()-2)
+registerDoParallel(cores = detectCores())
 
 
 doingReps <- function(j){
