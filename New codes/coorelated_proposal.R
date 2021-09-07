@@ -10,7 +10,7 @@ library(doParallel)
 library(tictoc)
 library(mvtnorm)
 
-set.seed(678)
+set.seed(678)   
 
 sampler <- function(samp, ar_step, init, sigma){
 
@@ -26,9 +26,9 @@ sampler <- function(samp, ar_step, init, sigma){
     curr <- samp[i-1, ]                       # current state
     prop <- samp[i-1, ] + sigma*samp[i, ]     # proposed state
     temp <- sum(dnorm(L%*%prop, log = TRUE) - dnorm(L%*%curr, log = TRUE))
-    one_by_a <- exp(temp)/(1 + exp(temp))
+    a <- exp(temp)/(1 + exp(temp))
 
-    if(ar_step[i] <= one_by_a){
+    if(ar_step[i] <= a){
       samp[i, ] <- prop
       acc_prob <- acc_prob + 1
     }

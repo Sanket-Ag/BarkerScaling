@@ -6,16 +6,19 @@
 ##########################################################################################
 
 
-library(mcmcse)
+library(doParallel)
 library(tictoc)
 
-sampler <- function(samp, ar_step, sigma){
- 
+set.seed(678)   
+
+sampler <- function(samp, ar_step, init, sigma){
+
   # samp : the matrix containing draws from N(0, 1). Used to generate proposals and store the MC.
   # ar_step : a random uniform draw used at the accpet-reject step
   # sigma : proposal standard deviation
 
   acc_prob <- 0        # keeps track of the no. of acceptances
+  samp[1, ] <- init
 
   for(i in 2:N){
 
@@ -41,60 +44,85 @@ sampler <- function(samp, ar_step, sigma){
 # Parameters
 
 M <- 1e3  # no. of iterations
-N <- 1e5  # length of the chain
+N <- 1e6  # length of the chain
 d <- 50   # dimensions
-K <- 100  # batch size
 sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
 
 
 ##############################################
 # Variables to store data
 
-eff_bm <- matrix(0, nrow = M, ncol = length(sigma))      # Store the batch means se calculated using mcmcse package 
-eff_fc <- matrix(0, nrow = M, ncol = length(sigma))      # Stores first order autocorrelation
+
+eff_fc <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in bar{x}
+eff_ct <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in x_1 - bar{x}
+eff_ff <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in x_1
 acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
-tic()
 
-for(j in 1:M){
+# Number of cores
+detectCores()
+registerDoParallel(cores = detectCores() - 2)
 
+
+doingReps <- function(j)
+{
   print(paste0("Doing for m = ", j))
 
-  set.seed(j)
-  xi <- matrix(rnorm(d*N, mean = 0, sd = 1), ncol = d)
+  xi <- matrix(rnorm(N*d), ncol = d)
   prob <- runif(N)
+  init <- rnorm(d)
 
-  bm_j <- numeric(length = length(sigma))
   fc_j <- numeric(length = length(sigma))
+  ct_j <- numeric(length = length(sigma))
+  ff_j <- numeric(length = length(sigma))
   a_j <- numeric(length = length(sigma))
 
   for(i in 1:length(sigma)){
 
-    samp <- sampler(samp = xi, ar_step = prob, sigma = sigma[i])
-    e <- diag(mcse.multi(samp[[1]], r = 1, size = K)$cov)
+    samp <- sampler(samp = xi, ar_step = prob, init = init, sigma = sigma[i])
+    x <- samp[[1]][, 1]
     a_j[i] <- samp[[2]]
-    bm_j[i] <- mean(e)
 
-    # minimum autocorrelation
-    fc_j[i] <- mean(diag(matrix(cor(samp[[1]][-1,], samp[[1]][-N,]), ncol = d, nrow = d) ))
-    cat("\r", i)
+    ff_j[i] <- cor(x[-1], x[-N])
+
+    xbar <- rowMeans(samp[[1]])
+    fc_j[i] <- cor(xbar[-1], xbar[-N])
+
+    y <- x - xbar
+    ct_j[i] <- cor(y[-1], y[-N])
+   
   }
   
-  eff_bm[j, ] <- bm_j  
-  eff_fc[j, ] <- fc_j
-  acc_rate[j, ] <- a_j
+  return(cbind(fc_j, ct_j, a_j, ff_j))
  
-  print(paste0("Done for m = ", j))
 }
 
+tic()
+foo <- foreach(j = 1:M) %dopar% 
+{
+  doingReps(j)
+}
 toc()
 
+final.out <- array(unlist(foo), dim = c(length(sigma), 4, M))
 
-#########################################
+eff_fc <- t(final.out[ ,1, ])
+eff_ct <- t(final.out[ ,2, ])
+eff_ff <- t(final.out[ ,4, ])
+acc_rate <- t(final.out[ ,3, ])
+
+##################################3######
 # Save the results
-res <- list(sigma, eff_bm, eff_fc, acc_rate)
+
+res <- list(sigma, eff_fc, eff_ct, acc_rate)
 save(res, file = "multi_gaussian")
 
+# Plots
+pdf(file = "muti_gaussian.pdf")
+plot(sigma, colMeans(acc_rate), type = "l")
+abline(h = 0.158)
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = "x_i", ylab = "convergence time")
 
-############################################################################################################
-# END
+dev.off()

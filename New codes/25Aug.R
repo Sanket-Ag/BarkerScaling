@@ -24,9 +24,9 @@ sampler <- function(samp, ar_step, init, sigma){
     curr <- samp[i-1, ]                       # current state
     prop <- samp[i-1, ] + sigma*samp[i, ]     # proposed state
     temp <- sum(dnorm(L%*%prop, log = TRUE) - dnorm(L%*%curr, log = TRUE))
-    one_by_a <- exp(temp)/(1 + exp(temp))
+    a <- exp(temp)/(1 + exp(temp))
 
-    if(ar_step[i] <= one_by_a){
+    if(ar_step[i] <= a){
       samp[i, ] <- prop
       acc_prob <- acc_prob + 1
     }
@@ -67,7 +67,7 @@ L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 # Parameters
 
 M <- 1e3    # no. of iterations
-N <- 1e5    # length of the chain
+N <- 1e6    # length of the chain
 sigma <- seq(0.8/sqrt(d), 1.2/sqrt(d), length.out = 51)
 
 
@@ -169,7 +169,7 @@ L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 # Parameters
 
 M <- 1e3    # no. of iterations
-N <- 1e5    # length of the chain
+N <- 1e6    # length of the chain
 sigma <- seq(1.5/sqrt(d), 2.5/sqrt(d), length.out = 51)
 
 
