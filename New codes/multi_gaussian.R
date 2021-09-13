@@ -1,13 +1,11 @@
+library(doParallel)
+library(tictoc)
 ##########################################################################################
 #     Running Barker's alogrithm to find the optimal proposal variance. The target is 
 #     a 50 dimensional Gaussian distribution with mean 0 and identity covariance matrix.
 #     Proposals are also Gaussian with iid components with variance l^2/d. The aim will 
 #     be to find the optimal value of l by minimizing the first order auto-correlations.
 ##########################################################################################
-
-
-library(doParallel)
-library(tictoc)
 
 set.seed(678)   
 
