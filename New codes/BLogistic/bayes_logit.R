@@ -4,7 +4,6 @@
 
 library(doParallel)
 library(tictoc)
-#library(mvtnorm)
 
 set.seed(345)   
 
@@ -110,6 +109,8 @@ sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
 
 eff_fc <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in bar{x}
 eff_ct <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in x_1 - bar{x}
+eff_ff <- matrix(0, nrow = M, ncol = length(sigma))      # Stores estimated convergence time in x_1
+eff_ess <- matrix(0, nrow = M, ncol = length(sigma))     # Stores multivariate ESS for the output chain
 acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance probabilities
 
 
@@ -128,22 +129,28 @@ doingReps <- function(j)
 
   fc_j <- numeric(length = length(sigma))
   ct_j <- numeric(length = length(sigma))
+  ff_j <- numeric(length = length(sigma))
+  ess_j <- numeric(length = length(sigma))
   a_j <- numeric(length = length(sigma))
 
   for(i in 1:length(sigma)){
 
     samp <- sampler(y = y, X = X, samp = xi, ar_step = prob, init = glmFit$coeff, sigma = sigma[i])
-    a_j[i] <- samp$accept.prob
-
+    x <- samp$beta[, 1]
     xbar <- rowMeans(samp$beta)
+
+    a_j[i] <- samp$accept.prob
+    ff_j[i] <- cor(x[-1], x[-N])
     fc_j[i] <- cor(xbar[-1], xbar[-N])
 
-    x <- samp$beta[, 1] - xbar
-    ct_j[i] <- cor(x[-1], x[-N])
+    z <- x - xbar
+    ct_j[i] <- cor(z[-1], z[-N])
+
+    ess_j[i] <- multiESS(samp$beta, r = 1)
    
   }
   
-  return(cbind(fc_j, ct_j, a_j))
+  return(cbind(fc_j, ct_j, ff_j, ess_j, a_j))
  
 }
 
@@ -154,11 +161,13 @@ foo <- foreach(j = 1:M) %dopar%
 }
 toc()
 
-final.out <- array(unlist(foo), dim = c(length(sigma), 3, M))
+final.out <- array(unlist(foo), dim = c(length(sigma), 5, M))
 
 eff_fc <- t(final.out[ ,1, ])
 eff_ct <- t(final.out[ ,2, ])
-acc_rate <- t(final.out[ ,3, ])
+eff_ff <- t(final.out[ ,3, ])
+eff_ess <- t(final.out[ ,4, ])
+acc_rate <- t(final.out[ ,5, ])
 
 #########################################
 # Save the results
@@ -170,6 +179,8 @@ save(res, file = "bayes_logit")
 pdf(file = "bayes_logit.pdf")
 plot(sigma, colMeans(acc_rate), type = "l")
 abline(h = 0.183)
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_1 - bar{x}", ylab = "convergence time")
 plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = "x_1", ylab = "convergence time")
+plot(colMeans(acc_rate), colMeans(eff_ess), type = "l", main = "multiESS", ylab = "multiESS")
 dev.off()
