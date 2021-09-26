@@ -172,15 +172,15 @@ acc_rate <- t(final.out[ ,5, ])
 #########################################
 # Save the results
 
-res <- list(sigma, eff_fc, eff_ct, acc_rate)
+res <- list(sigma = sigma, eff_fc = eff_fc, eff_ct = eff_ct, eff_ff = eff_ff, eff_ess = eff_ess, acc_rate = acc_rate)
 save(res, file = "bayes_logit")
 
 # Plots
 pdf(file = "bayes_logit.pdf")
-plot(sigma, colMeans(acc_rate), type = "l")
+plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma))
 abline(h = 0.183)
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_1 - bar{x}", ylab = "convergence time")
-plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = "x_1", ylab = "convergence time")
-plot(colMeans(acc_rate), colMeans(eff_ess), type = "l", main = "multiESS", ylab = "multiESS")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar{x}), ylab = "convergence time", xlab = "acceptance rate")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = expression(bar{x}), ylab = "convergence time", xlab = "acceptance rate")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = expression('x'[1]), ylab = "convergence time", xlab = "acceptance rate")
+plot(colMeans(acc_rate), colMeans(eff_ess), type = "l", main = "multiESS", ylab = "multiESS", xlab = "acceptance rate")
 dev.off()
