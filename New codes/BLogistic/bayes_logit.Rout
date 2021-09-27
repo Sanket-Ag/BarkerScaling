@@ -79,15 +79,6 @@ Loading required package: parallel
 > # install.packages(titanic)
 > library(titanic)
 > library(mcmcse)
-mcmcse: Monte Carlo Standard Errors for MCMC
-Version 1.4-1 created on 2020-01-29.
-copyright (c) 2012, James M. Flegal, University of California, Riverside
-                    John Hughes, University of Colorado, Denver
-                    Dootika Vats, University of Warwick
-                    Ning Dai, University of Minnesota
- For citation information, type citation("mcmcse").
- Type help("mcmcse-package") to get started.
-
 > 
 > 
 > # Taking the relevant parameters in the data. 
@@ -195,104 +186,104 @@ copyright (c) 2012, James M. Flegal, University of California, Riverside
 [1] "Doing for m = 2"
 [1] "Doing for m = 3"
 [1] "Doing for m = 4"
-[1] "Doing for m = 7"
-[1] "Doing for m = 8"
 [1] "Doing for m = 6"
+[1] "Doing for m = 8"
+[1] "Doing for m = 7"
 [1] "Doing for m = 5"
-[1] "Doing for m = 11"
-[1] "Doing for m = 12"
 [1] "Doing for m = 10"
+[1] "Doing for m = 12"
+[1] "Doing for m = 11"
 [1] "Doing for m = 9"
+[1] "Doing for m = 14"
 [1] "Doing for m = 16"
 [1] "Doing for m = 15"
 [1] "Doing for m = 13"
-[1] "Doing for m = 14"
-[1] "Doing for m = 19"
-[1] "Doing for m = 20"
 [1] "Doing for m = 18"
+[1] "Doing for m = 20"
+[1] "Doing for m = 19"
 [1] "Doing for m = 17"
-[1] "Doing for m = 23"
 [1] "Doing for m = 24"
 [1] "Doing for m = 22"
 [1] "Doing for m = 21"
-[1] "Doing for m = 27"
+[1] "Doing for m = 23"
 [1] "Doing for m = 28"
 [1] "Doing for m = 26"
 [1] "Doing for m = 25"
-[1] "Doing for m = 31"
+[1] "Doing for m = 27"
 [1] "Doing for m = 32"
 [1] "Doing for m = 30"
 [1] "Doing for m = 29"
-[1] "Doing for m = 35"
-[1] "Doing for m = 36"
+[1] "Doing for m = 31"
 [1] "Doing for m = 34"
+[1] "Doing for m = 36"
 [1] "Doing for m = 33"
-[1] "Doing for m = 39"
+[1] "Doing for m = 35"
+[1] "Doing for m = 37"
 [1] "Doing for m = 40"
 [1] "Doing for m = 38"
-[1] "Doing for m = 37"
-[1] "Doing for m = 43"
-[1] "Doing for m = 44"
-[1] "Doing for m = 42"
+[1] "Doing for m = 39"
 [1] "Doing for m = 41"
-[1] "Doing for m = 47"
-[1] "Doing for m = 48"
-[1] "Doing for m = 46"
+[1] "Doing for m = 42"
+[1] "Doing for m = 44"
+[1] "Doing for m = 43"
 [1] "Doing for m = 45"
-[1] "Doing for m = 51"
-[1] "Doing for m = 52"
-[1] "Doing for m = 50"
+[1] "Doing for m = 46"
+[1] "Doing for m = 48"
+[1] "Doing for m = 47"
 [1] "Doing for m = 49"
-[1] "Doing for m = 55"
-[1] "Doing for m = 56"
-[1] "Doing for m = 54"
+[1] "Doing for m = 50"
+[1] "Doing for m = 52"
+[1] "Doing for m = 51"
 [1] "Doing for m = 53"
-[1] "Doing for m = 59"
-[1] "Doing for m = 60"
-[1] "Doing for m = 58"
+[1] "Doing for m = 54"
+[1] "Doing for m = 56"
+[1] "Doing for m = 55"
 [1] "Doing for m = 57"
-[1] "Doing for m = 63"
-[1] "Doing for m = 64"
-[1] "Doing for m = 62"
+[1] "Doing for m = 58"
+[1] "Doing for m = 60"
+[1] "Doing for m = 59"
 [1] "Doing for m = 61"
-[1] "Doing for m = 67"
-[1] "Doing for m = 68"
-[1] "Doing for m = 66"
+[1] "Doing for m = 62"
+[1] "Doing for m = 64"
+[1] "Doing for m = 63"
 [1] "Doing for m = 65"
-[1] "Doing for m = 71"
-[1] "Doing for m = 72"
+[1] "Doing for m = 66"
+[1] "Doing for m = 68"
+[1] "Doing for m = 67"
 [1] "Doing for m = 70"
 [1] "Doing for m = 69"
-[1] "Doing for m = 75"
-[1] "Doing for m = 76"
+[1] "Doing for m = 72"
+[1] "Doing for m = 71"
 [1] "Doing for m = 74"
 [1] "Doing for m = 73"
-[1] "Doing for m = 79"
-[1] "Doing for m = 80"
+[1] "Doing for m = 76"
+[1] "Doing for m = 75"
 [1] "Doing for m = 78"
 [1] "Doing for m = 77"
-[1] "Doing for m = 83"
-[1] "Doing for m = 84"
+[1] "Doing for m = 80"
+[1] "Doing for m = 79"
 [1] "Doing for m = 82"
 [1] "Doing for m = 81"
-[1] "Doing for m = 87"
-[1] "Doing for m = 88"
+[1] "Doing for m = 84"
+[1] "Doing for m = 83"
 [1] "Doing for m = 86"
 [1] "Doing for m = 85"
-[1] "Doing for m = 91"
-[1] "Doing for m = 92"
+[1] "Doing for m = 88"
+[1] "Doing for m = 87"
 [1] "Doing for m = 90"
 [1] "Doing for m = 89"
-[1] "Doing for m = 95"
-[1] "Doing for m = 96"
+[1] "Doing for m = 92"
+[1] "Doing for m = 91"
 [1] "Doing for m = 94"
 [1] "Doing for m = 93"
-[1] "Doing for m = 99"
-[1] "Doing for m = 100"
+[1] "Doing for m = 96"
+[1] "Doing for m = 95"
 [1] "Doing for m = 98"
 [1] "Doing for m = 97"
+[1] "Doing for m = 100"
+[1] "Doing for m = 99"
 > toc()
-17740.014 sec elapsed
+18301.414 sec elapsed
 > 
 > final.out <- array(unlist(foo), dim = c(length(sigma), 5, M))
 > 
@@ -305,21 +296,13 @@ copyright (c) 2012, James M. Flegal, University of California, Riverside
 > #########################################
 > # Save the results
 > 
-> res <- list(sigma, eff_fc, eff_ct, acc_rate)
+> res <- list(sigma = sigma, eff_fc = eff_fc, eff_ct = eff_ct, eff_ff = eff_ff, eff_ess = eff_ess, acc_rate = acc_rate)
 > save(res, file = "bayes_logit")
 > 
 > # Plots
 > pdf(file = "bayes_logit.pdf")
-> plot(sigma, colMeans(acc_rate), type = "l")
+> plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma))
 > abline(h = 0.183)
-> plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_1 - bar{x}", ylab = "convergence time")
-> plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
-> plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = "x_1", ylab = "convergence time")
-> plot(colMeans(acc_rate), colMeans(eff_ess), type = "l", main = "multiESS", ylab = "multiESS")
-> dev.off()
-null device 
-          1 
-> 
-> proc.time()
-    user   system  elapsed 
-49918.32 19740.29 17740.47 
+> plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar{x}), ylab = "convergence time", xlab = "acceptance rate")
+Error: unexpected '{' in "plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar{"
+Execution halted
