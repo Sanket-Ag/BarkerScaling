@@ -1,3 +1,4 @@
+
 ##############################################################################################
 #     A simple covariance matrix
 #     We will do two target distributions. Both are zero mean Gaussian with each component 
@@ -135,10 +136,11 @@ save(res, file = "25Aug_rho085")
 
 # Plots
 pdf(file = "25Aug_rho085.pdf")
-plot(sigma, colMeans(acc_rate), type = "l")
+par(mar = c(5.1, 5, 2.1, 2.1))
+plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma), cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 abline(h = 0.158)
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
-plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
+plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = expression(bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 dev.off()
 
 

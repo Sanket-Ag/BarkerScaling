@@ -1,0 +1,16 @@
+x <- rnorm(1e6)
+v
+getwd()
+setwd("/Users/sanket/GitHub/BarkerScaling/New codes")
+load("multi_gaussian")
+ls
+ls()
+str(res)
+plot(res[[1]], colMeans(res[[2]]), main = expression(bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression(x_1 - bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression('x'[1] - bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression('x'[1] '-' bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression('x'[1] + '-' bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression('x'[1] + '-' + bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression('x'[1] - bar(x)))
+plot(res[[1]], colMeans(res[[2]]), main = expression(sigma))

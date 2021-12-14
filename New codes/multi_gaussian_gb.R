@@ -1,10 +1,11 @@
 library(doParallel)
 library(tictoc)
 ##########################################################################################
-#     Running Barker's alogrithm to find the optimal proposal variance. The target is 
-#     a 50 dimensional Gaussian distribution with mean 0 and identity covariance matrix.
-#     Proposals are also Gaussian with iid components with variance l^2/d. The aim will 
-#     be to find the optimal value of l by minimizing the first order auto-correlations.
+#     Running Generalized Barker's alogrithm (with r = 2) to find the optimal proposal  
+#     variance. The target is a 50 dimensional Gaussian distribution with mean 0 and 
+#     identity covariance matrix. Proposals are also Gaussian with iid components with  
+#     variance l^2/d. The aim will be to find the optimal value of l by minimizing the 
+#     first order auto-correlations.
 ##########################################################################################
 
 set.seed(678)   
@@ -23,7 +24,7 @@ sampler <- function(samp, ar_step, init, sigma){
     curr <- samp[i-1, ]                       # current state
     prop <- samp[i-1, ] + sigma*samp[i, ]     # proposed state
     temp <- sum(dnorm(prop, log = TRUE) - dnorm(curr, log = TRUE))
-    a <- exp(temp)/(1 + exp(temp))
+    a <- (exp(temp) + exp(2*temp))/(1 + exp(temp) + exp(2*temp))
 
     if(ar_step[i] <= a){
       samp[i, ] <- prop
@@ -113,13 +114,13 @@ acc_rate <- t(final.out[ ,3, ])
 # Save the results
 
 res <- list(sigma, eff_fc, eff_ct, eff_ff, acc_rate)
-save(res, file = "multi_gaussian")
+save(res, file = "multi_gaussian_2")
 
 # Plots
-pdf(file = "muti_gaussian.pdf")
+pdf(file = "muti_gaussian_2.pdf")
 par(mar = c(5.1, 5, 2.1, 2.1))
 plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma), cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
-abline(h = 0.158)
+abline(h = 0.197)
 plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = expression(bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 plot(colMeans(acc_rate), -1/log(colMeans(eff_ff)), type = "l", main = expression('x'[1]), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)

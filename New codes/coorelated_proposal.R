@@ -136,10 +136,11 @@ save(res, file = "CoorProp_085")
 
 # Plots
 pdf(file = "CoorProp_085.pdf")
-plot(sigma, colMeans(acc_rate), type = "l")
+par(mar = c(5.1, 5, 2.1, 2.1))
+plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma), cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 abline(h = 0.158)
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
-plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
+plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = expression(bar(x)), ylab = "convergence time", xlab = "acceptance rate", cex.main = 2.25, cex.lab = 1.75, cex.axis = 1.75)
 dev.off()
 
 
@@ -239,10 +240,10 @@ save(res, file = "CoorProp_04")
 
 # Plots
 pdf(file = "CoorProp_04.pdf")
-plot(sigma, colMeans(acc_rate), type = "l")
+plot(sigma, colMeans(acc_rate), type = "l", ylab = "acceptance rate", xlab = expression(sigma))
 abline(h = 0.158)
-plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = "x_i - bar{x}", ylab = "convergence time")
-plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = "bar{x}", ylab = "convergence time")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_ct)), type = "l", main = expression('x'[1] - bar(x)), ylab = "convergence time", xlab = "acceptance rate")
+plot(colMeans(acc_rate), -1/log(colMeans(eff_fc)), type = "l", main = expression(bar(x)), ylab = "convergence time", xlab = "acceptance rate")
 dev.off()
 
 ############################################################################################################
