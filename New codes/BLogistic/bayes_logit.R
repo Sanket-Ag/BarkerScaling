@@ -99,9 +99,9 @@ L <- diag(sqrt(1/S$values))%*%t(S$vectors)
 #############################################
 # Parameters
 
-M <- 1e2   # no. of iterations
-N <- 1e5   # length of the chain
-sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 51)
+M <- 100   # no. of iterations
+N <- 5e6   # length of the chain
+sigma <- seq(2/sqrt(d), 3/sqrt(d), length.out = 11)
 
 
 ##############################################
@@ -116,7 +116,7 @@ acc_rate <- matrix(0, nrow = M, ncol = length(sigma))    # Stores acceptance pro
 
 # Number of cores
 detectCores()
-registerDoParallel(cores = detectCores()-2)
+registerDoParallel(cores = detectCores()-6)
 
 
 doingReps <- function(j)
@@ -155,7 +155,7 @@ doingReps <- function(j)
 }
 
 tic()
-foo <- foreach(j = 1:M) %dopar% 
+foo <- foreach(j = 1:M, .packages = "mcmcse") %dopar% 
 {
   doingReps(j)
 }
